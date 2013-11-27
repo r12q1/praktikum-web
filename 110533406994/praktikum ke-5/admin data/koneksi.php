@@ -4,7 +4,7 @@
 
 $host = 'localhost';
 $user = 'root';
-$pass = 'haqiemkun';
+$pass = 'root';
 $db   = 'mysql';
 
 $cnn = mysql_connect($host, $user, $pass);
