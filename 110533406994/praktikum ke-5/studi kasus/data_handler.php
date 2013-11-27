@@ -8,38 +8,41 @@ if (isset($_GET['act']) && $_GET['act'] == 'add') {
 data_editor($root);
 return;
 }
-        $sql = 'SELECT COUNT(*) AS total FROM ' . MHS;
-        $res = mysql_query($sql);
+
+$sql = 'SELECT COUNT(*) AS total FROM ' . MHS;
+$res = mysql_query($sql);
+
 // Jika data di tabel ada
-                if (mysql_num_rows($res)) {
-                if (isset($_GET['act']) && $_GET['act'] != '') {
-                switch($_GET['act']) {
-        case 'edit':
-        if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
-        data_editor($root, $_GET['id']);
-        } else {
-        show_admin_data($root);
-        }
+if (mysql_num_rows($res)) {
+if (isset($_GET['act']) && $_GET['act'] != '') {
+switch($_GET['act']) {
+case 'edit':
+if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
+data_editor($root, $_GET['id']);
+} else {
+show_admin_data($root);
+}
 break;
-        case 'view':
-        if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
-        data_detail($root, $_GET['id'], 1);
-        } else {
-        show_admin_data($root);
-        }
+case 'view':
+if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
+data_detail($root, $_GET['id'], 1);
+} else {
+show_admin_data($root);
+}
 break;
 case 'del':
-if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
+if (isset($_GET['id']) && ctype_digit($_GET['id'])) { ?>
+<h2>Hapus Data</h2>
+<div style="margin:auto; margin-bottom:5px; width:700px">
+<?php echo 'Apakah data berikut ini akan dihapus ?'; ?>
+</div>
+<?php data_detail($root, $_GET['id'], 1);
 // Key untuk penghapusan data
-$id = $_GET['id'];
-// Lengkapi pernyataan SQL hapus data
-$res = mysql_query($sql);
-if ($res) { ?>
-// Lengkapi script untuk redireksi ke root
-<?php
-} else {
-echo 'Gagal menghapus data';
-}
+$id = $_GET['id']; ?>
+<form action="<?php $_SERVER['PHP_SELF'];?>" method="get" style="margin:auto; margin-top:5px; width:700px">
+	<input type="button" name="submit" value="Yes" onClick="data_delete($root, $id)" />
+	<input type="button" value="No" onClick="history.go(-1)" />
+</form><?php
 } else {
 show_admin_data($root);
 }
@@ -55,6 +58,7 @@ show_admin_data($root);
 echo 'Data Tidak Ditemukan';
 }
 }
+
 /**
 * Fungsi untuk menampilkan menu administrasi
 * @param string root parameter menu
@@ -69,36 +73,40 @@ $num = mysql_num_rows($res);
 if ($num) {
 ?>
 <div class="tabel">
-        <div style="padding:5px;">
-        <a href="<?php echo $root;?>&amp;act=add">Tambah Data</a>
+<div style="padding:5px;">
+<a href="<?php echo $root;?>&amp;act=add">Tambah Data</a>
 </div>
 <table border=1 width=700 cellpadding=4 cellspacing=0>
 <tr>
-        <th>#</th>
-        <th width=120>NIM</th>
-        <th width=200>Nama</th>
-        <th width=200>Alamat</th>
-        <th>Menu</th>
+<th>#</th>
+<th width=120>NIM</th>
+<th width=200>Nama</th>
+<th width=200>Alamat</th>
+<th>Menu</th>
 </tr>
 <?php
-        $i = 1;
-        while ($row = mysql_fetch_row($res)) {
-        $bg = (($i % 2) != 0) ? '' : 'even';
-        $id = $row[0]; 
-?>
-        <tr class="<?php echo $bg;?>">
-        <td width="2%"><?php echo $i;?></td>
-        <td>
-                <a href="<?php echo $root;?>&amp;act=view&amp;id=
-                <?php echo $id;?>"title="Lihat Data"><?php echo $id;?></a>
-        </td>
-        <td><?php echo $row[1];?></td>
-        <td><?php echo $row[2]?></td>
-        <td align="center"> | <a href="<?php echo $root;?>&amp;act=edit&amp;id=
-        <?php echo $id;?>">Edit</a> |
-        <!--Lengkapi kode PHP untuk membuat link hapus data-->
-        </td>
-        </tr>
+$i = 1;
+while ($row = mysql_fetch_row($res)) {
+$bg = (($i % 2) != 0) ? '' : 'even';
+$id = $row[0]; ?>
+<tr class="<?php echo $bg;?>">
+<td width="2%"><?php echo $i;?></td>
+<td>
+<a href="<?php echo $root;?>&amp;act=view&amp;id=
+<?php echo $id;?>"title="Lihat Data"><?php echo $id;?></a>
+</td>
+<td><?php echo $row[1];?></td>
+<td><?php echo $row[2]?></td>
+<td align="center">
+| <a href="<?php echo $root;?>&amp;act=edit&amp;id=
+<?php echo $id;?>">
+Edit</a>
+| <a href="<?php echo $root;?>&amp;act=del&amp;id= <?php echo $id;?>" title="Hapus Data"> Hapus</a>
+<!--
+Lengkapi kode PHP untuk membuat link hapus data
+-->
+</td>
+</tr>
 <?php
 $i++;
 }
@@ -128,25 +136,25 @@ if (mysql_num_rows($res)) { ?>
 <div class="tabel">
 <table border=1 width=700 cellpadding=4 cellspacing=0>
 <?php
-        $row = mysql_fetch_row($res); ?>
-        <tr>
-        <td>NIM</td>
-        <td><?php echo $row[0];?></td>
-        </tr>
-        <tr>
-        <td>Nama</td>
-        <td><?php echo $row[1];?></td>
-        </tr>
-        <tr>
-        <td>Alamat</td>
-        <td><?php echo $row[2];?></td>
-        </tr>
-        </table>
-        </div>
-        <?php
-        } else {
-        echo 'Data Tidak Ditemukan';
-        }
+$row = mysql_fetch_row($res); ?>
+<tr>
+<td>NIM</td>
+<td><?php echo $row[0];?></td>
+</tr>
+<tr>
+<td>Nama</td>
+<td><?php echo $row[1];?></td>
+</tr>
+<tr>
+<td>Alamat</td>
+<td><?php echo $row[2];?></td>
+</tr>
+</table>
+</div>
+<?php
+} else {
+echo 'Data Tidak Ditemukan';
+}
 @mysql_close($res);
 }
 }
@@ -235,3 +243,25 @@ onclick="history.go(-1)" /></td>
 }
 return false;
 }
+// Fungsi untuk menghasilkan form menghapus @param string root parameter menu @param integer id nim mahasiswa
+function data_delete($root, $id) {
+if (isset($_GET['id']) && $_GET['id']) {
+// Pernyataan SQL hapus data
+
+
+$sql = "DELETE FROM " . MHS . " WHERE nim =" . $id;
+@$res = mysql_query($sql);
+if ($res) {
+// Script untuk redireksi ke root
+?>
+<script type="text/javascript">
+document.location.href="<?php echo $root;?>";
+</script>
+<?php echo 'Data dengan NIM ' . $id . ' berhasil dihapus';
+} else {
+echo 'Gagal menghapus data';
+}
+@mysql_close($res);
+}
+}
+?>

@@ -3,11 +3,8 @@
 * Fungsi utama untuk menangani pengolahan data
 * @param string root parameter menu
 */
-require_once './koneksi.php';
-// Konstanta nama tabel
-define('MHS', 'mahasiswa');
-ini_set('display_errors', 1);
-define('_VALID', 1);
+
+
 function data_handler($root) {
 if (isset($_GET['act']) && $_GET['act'] == 'add') {
 data_editor($root);
@@ -33,9 +30,24 @@ data_detail($root, $_GET['id'], 1);
 show_admin_data($root);
 }
 break;
+
+
 case 'del':
 if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
-data_delete($root, $_GET['id']);
+// Key untuk penghapusan data
+$id = $_GET['id'];
+// Lengkapi pernyataan SQL hapus data
+        $sql = "delete from mahasiswa where nim = '$id'";
+        mysql_query($sql);
+        $res = mysql_query($sql);
+if ($res) { ?>
+<script type="text/javascript">
+document.location.href="<?php echo $root;?>";
+</script>
+<?php
+} else {
+echo 'Gagal menghapus data';
+}
 } else {
 show_admin_data($root);
 }
@@ -51,6 +63,8 @@ show_admin_data($root);
 echo 'Data Tidak Ditemukan';
 }
 }
+
+
 /**
 * Fungsi untuk menampilkan menu administrasi
 * @param string root parameter menu
@@ -65,37 +79,42 @@ $num = mysql_num_rows($res);
 if ($num) {
 ?>
 <div class="tabel">
-        <div style="padding:5px;">
-        <a href="<?php echo $root;?>&amp;act=add">Tambah Data</a>
+<div style="padding:5px;">
+<a href="<?php echo $root;?>&amp;act=add">Tambah Data</a>
 </div>
 <table border=1 width=700 cellpadding=4 cellspacing=0>
 <tr>
-        <th>#</th>
-        <th width=120>NIM</th>
-        <th width=200>Nama</th>
-        <th width=200>Alamat</th>
-        <th colspan="2">Menu</th>
+<th>#</th>
+<th width=120>NIM</th>
+<th width=200>Nama</th>
+<th width=200>Alamat</th>
+<th>Menu</th>
 </tr>
 <?php
-        $i = 1;
-        while ($row = mysql_fetch_row($res)) {
-        $bg = (($i % 2) != 0) ? '' : 'even';
-        $id = $row[0]; 
-?>
-        <tr class="<?php echo $bg;?>">
-        <td width="2%"><?php echo $i;?></td>
-        <td>
-                <a href="<?php echo $root;?>&amp;act=view&amp;id=
-                <?php echo $id;?>"title="Lihat Data"><?php echo $id;?></a>
-        </td>
-        <td><?php echo $row[1];?></td>
-        <td><?php echo $row[2]?></td>
-        <td align="center"> | <a href="<?php echo $root;?>&amp;act=edit&amp;id=
-        <?php echo $id;?>">Edit</a> |
-        <td align="center"> | <a href="<?php echo $root;?>&amp;act=del&amp;id=
-        <?php echo $id;?>" onclick="return confirm('Apakah anda yakin akan menghapus data ini?')">Hapus</a> |
-        </td>
-        </tr>
+$i = 1;
+while ($row = mysql_fetch_row($res)) {
+$bg = (($i % 2) != 0) ? '' : 'even';
+$id = $row[0]; ?>
+<tr class="<?php echo $bg;?>">
+<td width="2%"><?php echo $i;?></td>
+<td>
+<a href="<?php echo $root;?>&amp;act=view&amp;id=
+<?php echo $id;?>"
+title="Lihat Data"><?php echo $id;?></a>
+</td>
+<td><?php echo $row[1];?></td>
+<td><?php echo $row[2]?></td>
+<td align="center">
+| <a href="<?php echo $root;?>&amp;act=edit&amp;id=
+<?php echo $id;?>">
+Edit</a> |
+<!--
+Lengkapi kode PHP untuk membuat link hapus data
+-->
+</a><a href="<?php echo $root;?>&amp;act=del&amp;id=<?php echo $id;?>" onclick="return confirm('Hapus data dengan <? echo $id ; echo ' ( '.$row[1].' )'?>?')">
+Hapus</a> |
+</td>
+</tr>
 <?php
 $i++;
 }
@@ -110,6 +129,8 @@ isi <a href="'.$root.'&amp;act=add">di sini</a>';
 @mysql_close($res);
 }
 }
+
+
 /**
 * Fungsi untuk menampilkan detail data mahasiswa
 * @param string root parameter menu
@@ -147,6 +168,8 @@ echo 'Data Tidak Ditemukan';
 @mysql_close($res);
 }
 }
+
+
 /**
 * Fungsi untuk menghasilkan form penambahan/pengubahan
 * @param string root parameter menu
@@ -154,15 +177,19 @@ echo 'Data Tidak Ditemukan';
 */
 function data_editor($root, $id = 0) {
 $view = true;
-if (isset($_POST['nim']) && $_POST['nama'] ) {
-$nim = $_POST['nim'];
-$nama = $_POST['nama'];
-$alamat = $_POST['alamat'];
+if (isset($_POST['nim']) && $_POST['nim'] ) {
+// Jika tidak disertai id, berarti insert baru
 if (!$id) {
 // Lengkapi Pernyataan PHP SQL untuk INSERT data
-$sql = "INSERT INTO mahasiswa
-VALUES ('" .$nim. "', '" .$nama. "', '" .$alamat. "' )";
-$res = mysql_query($sql);
+$nim = @$_POST['nim'];
+$nama = @$_POST['nama'];
+$alamat = @$_POST['alamat'];
+
+
+        $sql = "INSERT INTO mahasiswa VALUES ('" .$nim. "', '" .$nama. "', '" .$alamat. "' )";
+        $res = mysql_query($sql);
+
+
 if ($res) { ?>
 <script type="text/javascript">
 document.location.href="<?php echo $root;?>";
@@ -173,8 +200,11 @@ echo 'Gagal menambah data';
 }
 } else {
 // Lengkapi Pernyataan PHP SQL untuk UPDATE data
-$sql = "UPDATE " . MHS . " SET nim = '" .$nim. "', nama = '" .$nama. "', alamat = '" .$alamat. "' WHERE nim = " . $id;
-$res = mysql_query($sql);
+        $nim = @$_POST['nim'];
+        $nama = @$_POST['nama'];
+        $alamat = @$_POST['alamat'];
+        $sql = "UPDATE mahasiswa SET nama = '$nama', alamat = '$alamat' WHERE nim = '$nim'";
+        $res = mysql_query($sql);
 if ($res) { ?>
 <script type="text/javascript">
 document.location.href="<?php echo $root;?>";
@@ -239,21 +269,4 @@ onclick="history.go(-1)" /></td>
 }
 return false;
 }
-function data_delete($root, $id) {
-if (isset($_GET['id']) && $_GET['id']) {
-// Pernyataan SQL hapus data
-$sql = "DELETE FROM " . MHS . " WHERE nim =" . $id;
-@$res = mysql_query($sql);
-if ($res) {
 ?>
-<script type="text/javascript">
-document.location.href="<?php echo $root;?>";
-</script>
-<?php echo 'Data dengan NIM ' . $id . ' berhasil dihapus';
-} else {
-echo 'Gagal menghapus data';
-}
-@mysql_close($res);
-}
-}
-data_handler('?m=data');?>
