@@ -1,5 +1,5 @@
 <?php
-    mysql_connect("localhost","root","root");
+    mysql_connect("localhost","root","");
     mysql_select_db("myweb");
 	mysql_query("DELETE FROM mahasiswa2");
     require_once "excel_reader2.php";
